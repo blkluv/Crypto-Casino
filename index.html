@@ -6,27 +6,31 @@
     <title>Crypto Casino</title>
     <style>
         body {
-            background-color: #111;
+            background-color: #222;
             color: #fff;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
         }
         .container {
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
-            background: #222;
+            background: #111;
             border-radius: 10px;
             box-shadow: 0 0 10px #0f0;
         }
         button {
-            background: #0f0;
-            color: #000;
+            background: #ff0066;
+            color: #fff;
             padding: 10px 20px;
             border: none;
             cursor: pointer;
             margin: 5px;
             font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #ff3366;
         }
         .leaderboard {
             margin-top: 20px;
@@ -38,10 +42,35 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            background: #0f0;
+            background: #ff0066;
             color: #000;
             padding: 10px;
             border-radius: 5px;
+            font-size: 18px;
+        }
+        .roulette-table {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .roulette-bet {
+            width: 40px;
+            height: 40px;
+            margin: 5px;
+            background: #222;
+            border: 2px solid #ff0066;
+            border-radius: 5px;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .roulette-bet:hover {
+            background: #ff3366;
         }
         .roulette-wheel {
             width: 100px;
@@ -50,10 +79,16 @@
             border-radius: 50%;
             margin: 10px auto;
             transition: transform 2s ease-out;
+            background: radial-gradient(circle, red, black);
         }
         .blackjack-cards {
             font-size: 24px;
             margin-top: 10px;
+        }
+        .card {
+            margin: 10px;
+            display: inline-block;
+            font-size: 32px;
         }
     </style>
 </head>
@@ -61,28 +96,36 @@
 
     <div id="nameEntry">
         <h1>Welcome to Crypto Casino 🎰</h1>
-        <p>Enter your name:</p>
+        <p>Enter your name and join the game:</p>
         <input type="text" id="playerName" placeholder="Your Name">
         <button onclick="saveName()">Start Playing</button>
     </div>
 
     <div id="casinoSection" style="display:none;">
         <h1>Crypto Casino 🎰</h1>
-        <p>Bet your **fake Solana** and test your luck!</p>
+        <p>Place your bets, make your move, and let's see if you get lucky!</p>
         <p><strong>Memecoin Contract Address:</strong> <span id="ca">[Insert Your CA]</span></p>
 
         <div id="solBalance">SOL: 50</div>
 
         <div class="container">
             <h2>Roulette 🎡</h2>
-            <div class="roulette-wheel" id="rouletteWheel" style="background: radial-gradient(circle, red, black);"></div>
-            <button onclick="playRoulette()">Spin</button>
+            <div class="roulette-wheel" id="rouletteWheel"></div>
+            <div class="roulette-table" id="rouletteTable">
+                <div class="roulette-bet" onclick="placeBet(1)">1</div>
+                <div class="roulette-bet" onclick="placeBet(2)">2</div>
+                <div class="roulette-bet" onclick="placeBet(3)">3</div>
+                <div class="roulette-bet" onclick="placeBet(4)">4</div>
+                <div class="roulette-bet" onclick="placeBet('red')">Red</div>
+                <div class="roulette-bet" onclick="placeBet('black')">Black</div>
+            </div>
+            <button onclick="spinRoulette()">Spin Wheel</button>
             <p id="rouletteResult">Place your bet!</p>
         </div>
 
         <div class="container">
             <h2>Blackjack 🃏</h2>
-            <button onclick="playBlackjack()">Draw</button>
+            <button onclick="playBlackjack()">Deal Cards</button>
             <p id="blackjackResult">Try to hit 21!</p>
             <div class="blackjack-cards" id="blackjackCards"></div>
         </div>
@@ -97,6 +140,8 @@
         let solBalance = localStorage.getItem("solBalance") ? parseInt(localStorage.getItem("solBalance")) : 50;
         let playerName = localStorage.getItem("playerName") || "";
         let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        let rouletteBet = 0;
+        let blackjackBet = 0;
 
         function saveName() {
             playerName = document.getElementById("playerName").value.trim();
@@ -119,34 +164,39 @@
             list.innerHTML = leaderboard.map((entry, i) => `<li>${i + 1}. ${entry.name}: ${entry.score} SOL</li>`).join("");
         }
 
-        function playRoulette() {
-            let bet = Math.floor(Math.random() * 10);
-            let win = Math.random() < 0.5;
-            solBalance += win ? bet : -bet;
-            document.getElementById("rouletteResult").textContent = win ? `You won ${bet} SOL!` : `You lost ${bet} SOL!`;
+        function placeBet(bet) {
+            if (solBalance <= 0) return alert("You're out of SOL!");
+            rouletteBet = bet;
+            alert(`You placed a bet of ${bet} SOL!`);
+        }
+
+        function spinRoulette() {
+            if (rouletteBet === 0) return alert("Place a bet first!");
+            let result = Math.floor(Math.random() * 37); // 0-36
+            let resultColor = result % 2 === 0 ? "red" : "black";
+            let win = (rouletteBet === result || rouletteBet === resultColor);
+            solBalance += win ? rouletteBet : -rouletteBet;
+            document.getElementById("rouletteResult").textContent = `Result: ${result} ${resultColor}. You ${win ? 'won' : 'lost'} ${rouletteBet} SOL.`;
             updateBalance();
-
-            // Animate Roulette
-            let wheel = document.getElementById("rouletteWheel");
-            let rotation = Math.floor(Math.random() * 360) + 720; // Spin at least 2 full rotations
-            wheel.style.transform = `rotate(${rotation}deg)`;
-
+            animateRoulette();
             saveScore();
         }
 
+        function animateRoulette() {
+            let wheel = document.getElementById("rouletteWheel");
+            let rotation = Math.floor(Math.random() * 360) + 720;
+            wheel.style.transform = `rotate(${rotation}deg)`;
+        }
+
         function playBlackjack() {
-            let score = Math.floor(Math.random() * 11) + 10;
-            let win = score === 21;
-            solBalance += win ? 20 : -5;
-            document.getElementById("blackjackResult").textContent = win ? "BLACKJACK! +20 SOL" : `You got ${score}. -5 SOL`;
+            let playerScore = Math.floor(Math.random() * 11) + 12;
+            let dealerScore = Math.floor(Math.random() * 11) + 12;
+            let win = playerScore > dealerScore && playerScore <= 21;
+            blackjackBet = 5;  // Fixed bet amount
+            solBalance += win ? blackjackBet : -blackjackBet;
+            document.getElementById("blackjackResult").textContent = win ? `You won ${blackjackBet} SOL!` : `You lost ${blackjackBet} SOL.`;
+            document.getElementById("blackjackCards").innerHTML = `Your Score: ${playerScore} | Dealer's Score: ${dealerScore}`;
             updateBalance();
-
-            // Animate Card Draw
-            let cardSymbols = ["♠️", "♥️", "♦️", "♣️"];
-            let card1 = cardSymbols[Math.floor(Math.random() * 4)];
-            let card2 = cardSymbols[Math.floor(Math.random() * 4)];
-            document.getElementById("blackjackCards").innerHTML = `Cards: ${card1} ${card2}`;
-
             saveScore();
         }
 
