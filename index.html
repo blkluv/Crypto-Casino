@@ -132,12 +132,12 @@
     <div id="solBalance">SOL: 100</div>
 
     <!-- Roulette Section -->
-    <div class="container" id="rouletteSection">
+    <div id="rouletteSection" class="container">
       <h2>Roulette 🎡</h2>
-      <p>Place your bets on numbers, colors, odd or even – stack 'em up degen style!</p>
+      <p>Place your bets on numbers, colors, odd or even – stack ‘em up degen style! You can bet on multiple outcomes before the spin.</p>
       <div class="roulette-wheel" id="rouletteWheel"></div>
       <div class="roulette-table" id="rouletteTable">
-        <!-- For demonstration, we'll show numbers 0 to 12 -->
+        <!-- For demo, numbers 0-12 -->
         <div class="roulette-bet" onclick="placeRouletteBet('0')">0</div>
         <div class="roulette-bet" onclick="placeRouletteBet('1')">1</div>
         <div class="roulette-bet" onclick="placeRouletteBet('2')">2</div>
@@ -157,30 +157,33 @@
         <div class="roulette-bet" onclick="placeRouletteBet('odd')">Odd</div>
         <div class="roulette-bet" onclick="placeRouletteBet('even')">Even</div>
       </div>
+      <div id="currentBets" style="margin:10px; font-weight:bold;">Current Bets: None</div>
       <button onclick="spinRoulette()">Spin the Wheel</button>
       <p id="rouletteResult">Place your bets!</p>
       <button onclick="clearRouletteBets()">Clear Bets</button>
     </div>
 
     <!-- Blackjack Section -->
-    <div class="container" id="blackjackSection">
+    <div id="blackjackSection" class="container">
       <h2>Blackjack 🃏</h2>
-      <p>Bet big, hit or stick – beat the dealer and rule the table!</p>
+      <p>Bet big, hit or stick – beat the dealer and rule the table! Enter your bet for this round:</p>
       <p>
-        Bet Amount (SOL): <input type="number" id="bjBet" min="1" placeholder="Bet" />
+        Bet Amount (SOL): <input type="number" id="bjBet" min="1" placeholder="Bet Amount" />
         <button onclick="startBlackjack()">Deal Cards</button>
       </p>
-      <div class="blackjack-cards" id="playerCards"></div>
-      <div class="blackjack-cards" id="dealerCards"></div>
-      <div class="hit-stick" id="bjControls" style="display:none;">
-        <button onclick="hit()">Hit</button>
-        <button onclick="stick()">Stick</button>
+      <div id="blackjackGame" style="display:none;">
+        <div id="playerCards" class="blackjack-cards"></div>
+        <div id="dealerCards" class="blackjack-cards"></div>
+        <div id="bjControls" class="hit-stick">
+          <button onclick="hit()">Hit</button>
+          <button onclick="stick()">Stick</button>
+        </div>
+        <p id="blackjackResult">Waiting for your move...</p>
       </div>
-      <p id="blackjackResult">Waiting for your move...</p>
     </div>
 
     <!-- Leaderboard Section -->
-    <div class="leaderboard container" id="leaderboardSection">
+    <div id="leaderboardSection" class="container leaderboard">
       <h2>Leaderboard 🏆</h2>
       <p>Only real degen names allowed – track your win/loss relative to your starting 100 SOL.</p>
       <ul id="leaderboard"></ul>
@@ -193,71 +196,19 @@
      **********************/
     let solBalance = 100;
     let playerName = "";
-    // Clear old leaderboard data on new session
-    localStorage.removeItem("leaderboard");
-    let leaderboard = [];
-    
-    // Roulette bets: array of { betType, amount }
+    // Load persistent leaderboard from localStorage (or use empty array if not found)
+    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    // Roulette: array of bet objects { type, amount }
     let rouletteBets = [];
     
-    // Blackjack variables
-    let bjDeck = [];
-    let playerHand = [];
-    let dealerHand = [];
-    let currentBJBet = 0;
-    let inBlackjackGame = false;
-    
     /**********************
-     * HELPER FUNCTIONS
-     **********************/
-    
-    // Utility: Shuffle an array (Fisher-Yates)
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-    
-    // Create and shuffle a deck of cards
-    function createDeck() {
-      const suits = ['♠', '♥', '♦', '♣'];
-      const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-      let deck = [];
-      for (let suit of suits) {
-        for (let rank of ranks) {
-          let value = 0;
-          if (rank === 'A') value = 11;
-          else if (['J', 'Q', 'K'].includes(rank)) value = 10;
-          else value = parseInt(rank);
-          deck.push({ suit, rank, value });
-        }
-      }
-      return shuffle(deck);
-    }
-    
-    // Calculate blackjack hand total (handle Aces as 11 or 1)
-    function calculateHand(hand) {
-      let total = hand.reduce((sum, card) => sum + card.value, 0);
-      let aces = hand.filter(card => card.rank === 'A').length;
-      while (total > 21 && aces > 0) {
-        total -= 10;
-        aces--;
-      }
-      return total;
-    }
-    
-    /**********************
-     * NAME & LEADERBOARD
+     * NAME & LEADERBOARD FUNCTIONS
      **********************/
     function saveName() {
       playerName = document.getElementById("playerName").value.trim();
       if (playerName) {
-        // Reset balance and leaderboard for a new session
+        // Do not clear leaderboard—load it from localStorage already done.
         solBalance = 100;
-        localStorage.setItem("solBalance", solBalance);
-        leaderboard = [];
         updateBalance();
         updateLeaderboard();
         document.getElementById("nameEntry").style.display = "none";
@@ -266,35 +217,34 @@
     }
     
     function updateBalance() {
-      document.getElementById("solBalance").textContent = `SOL: ${solBalance}`;
+      document.getElementById("solBalance").textContent = "SOL: " + solBalance;
     }
     
     function updateLeaderboard() {
-      // For this session, leaderboard holds only players who entered their name.
-      // We push/update the current player’s record.
-      const existing = leaderboard.find(entry => entry.name === playerName);
+      // Check if player already exists in leaderboard
+      let existing = leaderboard.find(entry => entry.name === playerName);
       if (existing) {
         existing.score = solBalance;
       } else {
         leaderboard.push({ name: playerName, score: solBalance });
       }
-      // Display leaderboard
-      let list = document.getElementById("leaderboard");
-      list.innerHTML = leaderboard
-        .map((entry, i) => {
-          let diff = entry.score - 100;
-          return `<li>${i + 1}. ${entry.name}: ${entry.score} SOL (${diff >= 0 ? '+' : ''}${diff})</li>`;
-        })
-        .join("");
+      // Save leaderboard persistently
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      // Update leaderboard display (sorted by score descending)
+      let sorted = leaderboard.sort((a, b) => b.score - a.score);
+      let lbHTML = "";
+      sorted.forEach((entry, i) => {
+        let diff = entry.score - 100;
+        lbHTML += `<li>${i + 1}. ${entry.name}: ${entry.score} SOL (${diff >= 0 ? "+" : ""}${diff})</li>`;
+      });
+      document.getElementById("leaderboard").innerHTML = lbHTML;
     }
     
     /**********************
      * ROULETTE FUNCTIONS
      **********************/
-    
-    // When user clicks on a bet zone
     function placeRouletteBet(betType) {
-      let amount = parseInt(prompt(`Place your bet for ${betType} (Enter SOL amount):`));
+      let amount = parseFloat(prompt("Enter SOL amount to bet on " + betType + ":"));
       if (isNaN(amount) || amount <= 0) {
         alert("Invalid bet amount.");
         return;
@@ -303,12 +253,23 @@
         alert("Not enough SOL for that bet.");
         return;
       }
-      // Deduct bet amount immediately
       solBalance -= amount;
       updateBalance();
-      // Add bet to array
-      rouletteBets.push({ betType, amount });
-      alert(`Bet placed: ${amount} SOL on ${betType}.`);
+      rouletteBets.push({ type: betType, amount: amount });
+      displayCurrentBets();
+    }
+    
+    function displayCurrentBets() {
+      let html = "Current Bets: ";
+      if (rouletteBets.length === 0) {
+        html += "None";
+      } else {
+        rouletteBets.forEach(bet => {
+          html += bet.amount + " SOL on " + bet.type + " | ";
+        });
+      }
+      document.getElementById("currentBets").textContent = html;
+      updateLeaderboard();
     }
     
     function spinRoulette() {
@@ -316,39 +277,37 @@
         alert("Place at least one bet first!");
         return;
       }
-      // Spin animation
       animateRoulette();
-      // Wait for animation to complete (2s)
       setTimeout(() => {
-        // Outcome: random number 0-36
-        const outcome = Math.floor(Math.random() * 37);
-        const outcomeColor = getRouletteColor(outcome);
+        let outcome = Math.floor(Math.random() * 37); // Outcome 0-36
+        let outcomeColor = getRouletteColor(outcome);
         let totalWin = 0;
-        let resultMessage = `Outcome: ${outcome} (${outcomeColor}). `;
+        let message = "Outcome: " + outcome + " (" + outcomeColor + "). ";
     
         // Evaluate each bet
         rouletteBets.forEach(bet => {
           let win = false;
           let payout = 0;
-          if (!isNaN(bet.betType)) {
+          if (!isNaN(bet.type)) {
             // Bet on a specific number
-            if (parseInt(bet.betType) === outcome) {
+            if (parseInt(bet.type) === outcome) {
               win = true;
               payout = bet.amount * 35;
             }
-          } else if (bet.betType === "red" || bet.betType === "black") {
-            if (bet.betType === outcomeColor) {
+          } else if (bet.type === "red" || bet.type === "black") {
+            if (outcome !== 0 && bet.type === outcomeColor) {
               win = true;
-              payout = bet.amount * 1;
+              payout = bet.amount;
             }
-          } else if (bet.betType === "odd" || bet.betType === "even") {
-            if (outcome === 0) win = false;
-            else if (bet.betType === "odd" && outcome % 2 === 1) {
+          } else if (bet.type === "odd") {
+            if (outcome !== 0 && outcome % 2 === 1) {
               win = true;
-              payout = bet.amount * 1;
-            } else if (bet.betType === "even" && outcome % 2 === 0) {
+              payout = bet.amount;
+            }
+          } else if (bet.type === "even") {
+            if (outcome !== 0 && outcome % 2 === 0) {
               win = true;
-              payout = bet.amount * 1;
+              payout = bet.amount;
             }
           }
           if (win) {
@@ -356,29 +315,27 @@
           }
         });
     
-        // Return winnings or lose bets
         if (totalWin > 0) {
           solBalance += totalWin;
-          resultMessage += `You won ${totalWin} SOL on your bets!`;
+          message += "You win " + totalWin + " SOL!";
         } else {
-          resultMessage += "No wins this spin.";
+          message += "No winning bets.";
         }
     
-        document.getElementById("rouletteResult").textContent = resultMessage;
-        // Clear bets
+        document.getElementById("rouletteResult").textContent = message;
         rouletteBets = [];
+        displayCurrentBets();
         updateBalance();
         updateLeaderboard();
-      }, 2200);
+      }, 2000);
     }
     
     function animateRoulette() {
       let wheel = document.getElementById("rouletteWheel");
       let rotation = Math.floor(Math.random() * 360) + 720;
-      wheel.style.transform = `rotate(${rotation}deg)`;
+      wheel.style.transform = "rotate(" + rotation + "deg)";
     }
     
-    // European Roulette color mapping for 0-36
     function getRouletteColor(num) {
       if (num === 0) return "green";
       const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
@@ -386,11 +343,11 @@
     }
     
     function clearRouletteBets() {
-      // Refund bets
       rouletteBets.forEach(bet => {
         solBalance += bet.amount;
       });
       rouletteBets = [];
+      displayCurrentBets();
       updateBalance();
       alert("All roulette bets cleared.");
     }
@@ -398,38 +355,54 @@
     /**********************
      * BLACKJACK FUNCTIONS
      **********************/
+    let bjDeck = [];
+    let playerHand = [];
+    let dealerHand = [];
+    let inBlackjackGame = false;
+    let currentBJBet = 0;
+    
+    function createDeck() {
+      const suits = ["♠", "♥", "♦", "♣"];
+      const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+      let deck = [];
+      for (let s of suits) {
+        for (let r of ranks) {
+          let value = (r === "A") ? 11 : (["J", "Q", "K"].includes(r)) ? 10 : parseInt(r);
+          deck.push({ suit: s, rank: r, value: value });
+        }
+      }
+      return shuffle(deck);
+    }
     
     function startBlackjack() {
       if (inBlackjackGame) {
         alert("Finish the current game first!");
         return;
       }
-      let betInput = document.getElementById("bjBet").value;
-      currentBJBet = parseInt(betInput);
-      if (isNaN(currentBJBet) || currentBJBet <= 0) {
-        alert("Enter a valid bet amount for Blackjack.");
+      let betAmount = parseFloat(document.getElementById("bjBet").value);
+      if (isNaN(betAmount) || betAmount <= 0) {
+        alert("Enter a valid bet amount.");
         return;
       }
-      if (currentBJBet > solBalance) {
+      if (betAmount > solBalance) {
         alert("Not enough SOL for that bet.");
         return;
       }
+      currentBJBet = betAmount;
       solBalance -= currentBJBet;
       updateBalance();
-      // Initialize deck and hands
       bjDeck = createDeck();
       playerHand = [];
       dealerHand = [];
-      // Deal initial cards: two to player, two to dealer (one hidden)
       playerHand.push(bjDeck.pop());
       playerHand.push(bjDeck.pop());
       dealerHand.push(bjDeck.pop());
       dealerHand.push(bjDeck.pop());
       inBlackjackGame = true;
-      // Display cards: dealer shows first card only
+      document.getElementById("blackjackGame").style.display = "block";
       displayBlackjackHands(false);
-      document.getElementById("blackjackResult").textContent = "Choose: Hit or Stick?";
-      document.getElementById("bjControls").style.display = "block";
+      let playerTotal = calculateHand(playerHand);
+      document.getElementById("blackjackResult").textContent = "Your total: " + playerTotal + ". Choose Hit or Stick.";
     }
     
     function displayBlackjackHands(revealDealer) {
@@ -438,7 +411,7 @@
         playerHTML += `<span class="card">${card.rank}${card.suit}</span>`;
       });
       document.getElementById("playerCards").innerHTML = playerHTML;
-    
+      
       let dealerHTML = "Dealer's Cards: ";
       if (revealDealer) {
         dealerHand.forEach(card => {
@@ -451,21 +424,30 @@
       document.getElementById("dealerCards").innerHTML = dealerHTML;
     }
     
+    function calculateHand(hand) {
+      let total = hand.reduce((sum, card) => sum + card.value, 0);
+      let aces = hand.filter(card => card.rank === "A").length;
+      while (total > 21 && aces > 0) {
+        total -= 10;
+        aces--;
+      }
+      return total;
+    }
+    
     function hit() {
       if (!inBlackjackGame) return;
       playerHand.push(bjDeck.pop());
       displayBlackjackHands(false);
       let playerTotal = calculateHand(playerHand);
       if (playerTotal > 21) {
-        endBlackjack(false, `Busted at ${playerTotal}! You lose ${currentBJBet} SOL.`);
+        endBlackjack(false, "Busted at " + playerTotal + "! You lose " + currentBJBet + " SOL.");
       } else {
-        document.getElementById("blackjackResult").textContent = `Your total is ${playerTotal}. Hit or Stick?`;
+        document.getElementById("blackjackResult").textContent = "Your total: " + playerTotal + ". Hit or Stick?";
       }
     }
     
     function stick() {
       if (!inBlackjackGame) return;
-      // Reveal dealer's hidden card and have dealer hit until at least 17
       displayBlackjackHands(true);
       let dealerTotal = calculateHand(dealerHand);
       while (dealerTotal < 17) {
@@ -475,36 +457,37 @@
       }
       let playerTotal = calculateHand(playerHand);
       if (dealerTotal > 21 || playerTotal > dealerTotal) {
-        endBlackjack(true, `You win! Your ${playerTotal} beats dealer's ${dealerTotal}. You win ${currentBJBet} SOL.`);
+        endBlackjack(true, "You win! Your " + playerTotal + " beats dealer's " + dealerTotal + ". You win " + currentBJBet + " SOL.");
       } else if (playerTotal === dealerTotal) {
-        // Push: refund bet
-        solBalance += currentBJBet;
-        endBlackjack(null, `Push! Both scored ${playerTotal}. Bet refunded.`);
+        solBalance += currentBJBet; // refund for push
+        endBlackjack(null, "Push! Both scored " + playerTotal + ". Bet refunded.");
       } else {
-        endBlackjack(false, `Dealer wins with ${dealerTotal} vs your ${playerTotal}. You lose ${currentBJBet} SOL.`);
+        endBlackjack(false, "Dealer wins with " + dealerTotal + " vs your " + playerTotal + ". You lose " + currentBJBet + " SOL.");
       }
     }
     
     function endBlackjack(win, message) {
       inBlackjackGame = false;
-      document.getElementById("bjControls").style.display = "none";
       if (win === true) {
-        solBalance += currentBJBet * 2; // win: receive double your bet
+        solBalance += currentBJBet * 2;
       }
-      // No refund if lost (win === false); push already refunded above
       updateBalance();
       document.getElementById("blackjackResult").textContent = message;
       updateLeaderboard();
+      setTimeout(() => {
+        document.getElementById("blackjackGame").style.display = "none";
+      }, 3000);
     }
     
-    /**********************
-     * INITIALIZATION
-     **********************/
-    if (localStorage.getItem("playerName")) {
-      // If a name exists in storage, force re-entry for a fresh session.
-      localStorage.removeItem("playerName");
+    // Fisher-Yates shuffle
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
     }
+    
   </script>
-
 </body>
 </html>
