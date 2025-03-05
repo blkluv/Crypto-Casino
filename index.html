@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crypto Casino - Meme Coin Madness</title>
   <style>
-    /* Global Styles */
     body {
       background-color: #111;
       color: #fff;
@@ -57,8 +57,6 @@
       font-size: 18px;
       z-index: 1000;
     }
-
-    /* Roulette Wheel */
     .roulette-wheel {
       position: relative;
       width: 200px;
@@ -67,19 +65,19 @@
       margin: 20px auto;
       transition: transform 2s ease-out;
       background: conic-gradient(
-        green 0deg calc(360deg / 13),
-        red calc(360deg / 13) calc(2 * 360deg / 13),
-        black calc(2 * 360deg / 13) calc(3 * 360deg / 13),
-        red calc(3 * 360deg / 13) calc(4 * 360deg / 13),
-        black calc(4 * 360deg / 13) calc(5 * 360deg / 13),
-        red calc(5 * 360deg / 13) calc(6 * 360deg / 13),
-        black calc(6 * 360deg / 13) calc(7 * 360deg / 13),
-        red calc(7 * 360deg / 13) calc(8 * 360deg / 13),
-        black calc(8 * 360deg / 13) calc(9 * 360deg / 13),
-        red calc(9 * 360deg / 13) calc(10 * 360deg / 13),
-        black calc(10 * 360deg / 13) calc(11 * 360deg / 13),
-        red calc(11 * 360deg / 13) calc(12 * 360deg / 13),
-        black calc(12 * 360deg / 13) 360deg
+        green 0deg calc(360deg/13),
+        red calc(360deg/13) calc(2*360deg/13),
+        black calc(2*360deg/13) calc(3*360deg/13),
+        red calc(3*360deg/13) calc(4*360deg/13),
+        black calc(4*360deg/13) calc(5*360deg/13),
+        red calc(5*360deg/13) calc(6*360deg/13),
+        black calc(6*360deg/13) calc(7*360deg/13),
+        red calc(7*360deg/13) calc(8*360deg/13),
+        black calc(8*360deg/13) calc(9*360deg/13),
+        red calc(9*360deg/13) calc(10*360deg/13),
+        black calc(10*360deg/13) calc(11*360deg/13),
+        black calc(11*360deg/13) calc(12*360deg/13),
+        red calc(12*360deg/13) 360deg
       );
       border: 5px solid #fff;
       box-shadow: 0 0 20px #ff00ff;
@@ -109,8 +107,24 @@
       border-radius: 50%;
       transform: translate(-50%, -50%);
     }
-
-    /* Roulette Table Styling */
+    .candle {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 100px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      display: none;
+      z-index: 999;
+    }
+    .green-candle {
+      background-image: url('https://i.imgur.com/7kY0m4g.gif');
+    }
+    .red-candle {
+      background-image: url('https://i.imgur.com/5bZ0m4g.gif');
+    }
     .roulette-table {
       margin: 20px auto;
       display: grid;
@@ -134,13 +148,60 @@
     .roulette-bet:hover {
       background: #ff3388;
     }
+    .game-logo {
+      margin: 10px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .game-logo .icon {
+      font-size: 48px;
+    }
+    .game-logo .text {
+      font-size: 28px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .blackjack-logo {
+      background: linear-gradient(45deg, #ff0066, #ff3388);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #ff00ff;
+      display: inline-block;
+    }
+    .blackjack-logo span {
+      font-size: 32px;
+      font-weight: bold;
+    }
+    .blackjack-cards {
+      font-size: 24px;
+      margin-top: 10px;
+      min-height: 50px;
+    }
+    .card {
+      margin: 10px;
+      display: inline-block;
+      font-size: 32px;
+      padding: 10px;
+      border: 2px solid #ff0066;
+      border-radius: 5px;
+      background: #333;
+    }
+    .hit-stick {
+      margin-top: 20px;
+    }
+    .leaderboard {
+      margin-top: 20px;
+      background: #333;
+      padding: 10px;
+      border-radius: 10px;
+    }
   </style>
 </head>
 <body>
-  <!-- SOL Balance Display -->
   <div id="solBalance">SOL: 100</div>
-
-  <!-- Name Entry Section -->
   <div id="nameEntry" class="container">
     <h1>Welcome to Crypto Casino 🎰</h1>
     <p>The world’s biggest casino where meme coins make you a degen legend!</p>
@@ -148,24 +209,14 @@
     <input type="text" id="playerName" placeholder="Your Name" />
     <button onclick="saveName()">Start Playing</button>
   </div>
-
-  <!-- About Section -->
   <div id="aboutSection" class="container">
     <h2>About Crypto Casino ($CC)</h2>
-    <p>
-      Crypto Casino ($CC) isn’t just another meme coin—it’s a revolution in the world of degen gaming! Combining the thrill of casino classics like Roulette and Blackjack with blockchain power, $CC brings a community-driven, high-stakes experience where every spin and every card can turn you into a legend.
-    </p>
-    <p>
-      Buy $CC and join the ranks of those who dare to bet big, laugh hard, and ride the crypto wave. This is where memes meet money, and every degenerate has a shot at glory!
-    </p>
+    <p>Crypto Casino ($CC) isn’t just another meme coin—it’s a revolution in the world of degen gaming! Combining the thrill of casino classics like Roulette and Blackjack with blockchain power, $CC brings a community-driven, high-stakes experience where every spin and every card can turn you into a legend.</p>
+    <p>Buy $CC and join the ranks of those who dare to bet big, laugh hard, and ride the crypto wave. This is where memes meet money, and every degenerate has a shot at glory!</p>
   </div>
-
-  <!-- Main Casino Section -->
   <div id="casinoSection" style="display:none;">
     <h1>Crypto Casino 🎰</h1>
     <p><strong>Memecoin Contract Address:</strong> <span id="ca">[Insert Your CA]</span></p>
-
-    <!-- Roulette Section -->
     <div id="rouletteSection" class="container">
       <div class="game-logo" id="rouletteLogo">
         <span class="icon">🎡</span>
@@ -200,15 +251,14 @@
       <p id="rouletteResult">Place your bets, asshole!</p>
       <button onclick="clearRouletteBets()">Clear Bets, You Wimp</button>
     </div>
-
-    <!-- Blackjack Section -->
+    <div id="greenCandle" class="candle green-candle"></div>
+    <div id="redCandle" class="candle red-candle"></div>
     <div id="blackjackSection" class="container">
       <div class="game-logo" id="blackjackLogo">
         <div class="blackjack-logo"><span>🃏 BLACKJACK</span></div>
       </div>
       <p>Bet big, hit or stick – beat the dealer and rule the table! Enter your bet for this round:</p>
-      <p>
-        Bet Amount (SOL): <input type="number" id="bjBet" min="1" placeholder="Bet Amount" />
+      <p>Bet Amount (SOL): <input type="number" id="bjBet" min="1" placeholder="Bet Amount" />
         <button onclick="startBlackjack()">Deal Cards</button>
       </p>
       <div id="blackjackGame" style="display:none;">
@@ -221,22 +271,16 @@
         <p id="blackjackResult">Waiting for your move...</p>
       </div>
     </div>
-
-    <!-- Leaderboard Section -->
     <div id="leaderboardSection" class="container leaderboard">
       <h2>Degenerate Leaderboard</h2>
       <div id="leaderboardList"></div>
     </div>
   </div>
-
   <script>
-    // Global Variables
     let solBalance = 100;
     let playerName = "";
     let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
     let rouletteBets = [];
-
-    // Responses
     const rouletteWinResponses = [
       "Holy fuck, you’re on fire, you degen cunt!",
       "You ripped that wheel a new asshole, nice one!",
@@ -247,7 +291,6 @@
       "You didn’t fuck it up for once, you absolute legend!",
       "Playing like a pro—or just a lucky dickhead, huh?"
     ];
-
     const rouletteLossResponses = [
       "You lost, you useless fucking degenerate!",
       "Get absolutely rekt, you brain-dead twat!",
@@ -258,7 +301,6 @@
       "Try using your brain, if you’ve got one, asshole!",
       "Bleeding SOL like a gutted pig, you dumb cunt!"
     ];
-
     const outOfSOLResponses = [
       "You’re broke as fuck—get more SOL, you sad bastard!",
       "No SOL, you bankrupt fucking loser!",
@@ -268,8 +310,6 @@
       "Go beg for SOL, you penniless prick!",
       "Poorer than a street rat, you absolute wanker!"
     ];
-
-    // Add numbers to the wheel
     document.addEventListener("DOMContentLoaded", function() {
       const numbersDiv = document.querySelector(".roulette-wheel .numbers");
       const numSections = 13;
@@ -279,13 +319,11 @@
         const numberSpan = document.createElement("span");
         numberSpan.className = "number";
         numberSpan.textContent = i.toString();
-        const radius = 80; // Adjust based on wheel size
+        const radius = 80;
         numberSpan.style.transform = `rotate(${angle}deg) translate(0, -${radius}px) rotate(-${angle}deg)`;
         numbersDiv.appendChild(numberSpan);
       }
     });
-
-    // Name & Leaderboard Functions
     function saveName() {
       playerName = document.getElementById("playerName").value.trim();
       if (!playerName) {
@@ -297,11 +335,9 @@
       updateBalance();
       updateLeaderboard();
     }
-
     function updateBalance() {
       document.getElementById("solBalance").textContent = `SOL: ${solBalance.toFixed(2)}`;
     }
-
     function updateLeaderboard() {
       let playerExists = leaderboard.find(p => p.name === playerName);
       if (playerExists) {
@@ -318,8 +354,6 @@
       leaderboardHTML += "</ol>";
       document.getElementById("leaderboardList").innerHTML = leaderboardHTML;
     }
-
-    // Roulette Functions
     function placeRouletteBet(betType) {
       let amount = parseFloat(prompt(`How much SOL are you throwing at ${betType}, you reckless cunt?`));
       if (isNaN(amount) || amount <= 0) {
@@ -335,7 +369,6 @@
       rouletteBets.push({ type: betType, amount: amount });
       displayCurrentBets();
     }
-
     function displayCurrentBets() {
       let betsText = "Current Bets: ";
       if (rouletteBets.length === 0) {
@@ -345,13 +378,12 @@
       }
       document.getElementById("currentBets").textContent = betsText;
     }
-
     function spinRoulette() {
       if (rouletteBets.length === 0) {
         alert("Place a fucking bet first, you useless degenerate!");
         return;
       }
-      let outcome = Math.floor(Math.random() * 13); // 0-12
+      let outcome = Math.floor(Math.random() * 13);
       let anglePerSection = 360 / 13;
       let theta = outcome * anglePerSection;
       let rotation = 720 - theta;
@@ -360,7 +392,7 @@
       wheel.style.transform = `rotate(${rotation}deg)`;
       setTimeout(() => {
         wheel.style.transition = "none";
-        wheel.style.transform = `rotate(${-theta}deg)`; // Final position
+        wheel.style.transform = `rotate(${-theta}deg)`;
         let outcomeColor = getRouletteColor(outcome);
         let totalWin = 0;
         let message = `Landed on ${outcome} (${outcomeColor}), you prick! `;
@@ -396,8 +428,10 @@
           solBalance += totalWin;
           message += rouletteWinResponses[Math.floor(Math.random() * rouletteWinResponses.length)];
           message += ` You rake in ${totalWin} SOL, you smug fuck!`;
+          showCandle('green');
         } else {
           message += rouletteLossResponses[Math.floor(Math.random() * rouletteLossResponses.length)];
+          showCandle('red');
         }
         document.getElementById("rouletteResult").textContent = message;
         rouletteBets = [];
@@ -406,12 +440,18 @@
         updateLeaderboard();
       }, 2000);
     }
-
+    function showCandle(type) {
+      let candle = document.getElementById(type + 'Candle');
+      candle.style.display = 'block';
+      setTimeout(() => {
+        candle.style.display = 'none';
+      }, 3000);
+    }
     function getRouletteColor(num) {
       if (num === 0) return "green";
-      return num % 2 === 1 ? "red" : "black";
+      let redNumbers = [1,3,5,7,9,12];
+      return redNumbers.includes(num) ? "red" : "black";
     }
-
     function clearRouletteBets() {
       rouletteBets.forEach(bet => {
         solBalance += bet.amount;
@@ -421,14 +461,11 @@
       updateBalance();
       alert("Bets cleared, you indecisive twat.");
     }
-
-    // Blackjack Functions
     let bjDeck = [];
     let playerHand = [];
     let dealerHand = [];
     let inBlackjackGame = false;
     let currentBJBet = 0;
-
     function createDeck() {
       const suits = ["♠", "♥", "♦", "♣"];
       const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -441,7 +478,6 @@
       }
       return shuffle(deck);
     }
-
     function startBlackjack() {
       if (inBlackjackGame) {
         alert("Finish your current game, degenerate!");
@@ -472,7 +508,6 @@
       let playerTotal = calculateHand(playerHand);
       document.getElementById("blackjackResult").textContent = "Your total: " + playerTotal + ". Choose Hit or Stick.";
     }
-
     function displayBlackjackHands(revealDealer) {
       let playerHTML = "Your Cards: ";
       playerHand.forEach(card => {
@@ -490,7 +525,6 @@
       }
       document.getElementById("dealerCards").innerHTML = dealerHTML;
     }
-
     function calculateHand(hand) {
       let total = hand.reduce((sum, card) => sum + card.value, 0);
       let aces = hand.filter(card => card.rank === "A").length;
@@ -500,7 +534,6 @@
       }
       return total;
     }
-
     function hit() {
       if (!inBlackjackGame) return;
       playerHand.push(bjDeck.pop());
@@ -512,7 +545,6 @@
         document.getElementById("blackjackResult").textContent = "Your total: " + playerTotal + ". Hit or Stick?";
       }
     }
-
     function stick() {
       if (!inBlackjackGame) return;
       displayBlackjackHands(true);
@@ -526,13 +558,12 @@
       if (dealerTotal > 21 || playerTotal > dealerTotal) {
         endBlackjack(true, "You win! Your " + playerTotal + " beats dealer's " + dealerTotal + " and you win " + currentBJBet + " SOL.");
       } else if (playerTotal === dealerTotal) {
-        solBalance += currentBJBet; // refund for push
+        solBalance += currentBJBet;
         endBlackjack(null, "Push! It's a tie, you degen.");
       } else {
         endBlackjack(false, "Dealer wins with " + dealerTotal + " vs your " + playerTotal + ". You lose " + currentBJBet + " SOL.");
       }
     }
-
     function endBlackjack(win, message) {
       inBlackjackGame = false;
       if (win === true) {
@@ -545,8 +576,6 @@
         document.getElementById("blackjackGame").style.display = "none";
       }, 3000);
     }
-
-    // Fisher-Yates Shuffle
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -557,3 +586,4 @@
   </script>
 </body>
 </html>
+```
