@@ -6,7 +6,7 @@
     <title>Crypto Casino</title>
     <style>
         body {
-            background-color: #222;
+            background-color: #111;
             color: #fff;
             font-family: 'Arial', sans-serif;
             text-align: center;
@@ -15,9 +15,9 @@
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
-            background: #111;
+            background: #222;
             border-radius: 10px;
-            box-shadow: 0 0 10px #0f0;
+            box-shadow: 0 0 10px #ff3366;
         }
         button {
             background: #ff0066;
@@ -90,23 +90,25 @@
             display: inline-block;
             font-size: 32px;
         }
+        .hit-stick {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
     <div id="nameEntry">
         <h1>Welcome to Crypto Casino 🎰</h1>
-        <p>Enter your name and join the game:</p>
+        <p>The world’s biggest casino, where meme coins reign supreme. Enter your name and stake your claim!</p>
         <input type="text" id="playerName" placeholder="Your Name">
         <button onclick="saveName()">Start Playing</button>
     </div>
 
     <div id="casinoSection" style="display:none;">
         <h1>Crypto Casino 🎰</h1>
-        <p>Place your bets, make your move, and let's see if you get lucky!</p>
         <p><strong>Memecoin Contract Address:</strong> <span id="ca">[Insert Your CA]</span></p>
 
-        <div id="solBalance">SOL: 50</div>
+        <div id="solBalance">SOL: 100</div>
 
         <div class="container">
             <h2>Roulette 🎡</h2>
@@ -118,6 +120,8 @@
                 <div class="roulette-bet" onclick="placeBet(4)">4</div>
                 <div class="roulette-bet" onclick="placeBet('red')">Red</div>
                 <div class="roulette-bet" onclick="placeBet('black')">Black</div>
+                <div class="roulette-bet" onclick="placeBet('odd')">Odd</div>
+                <div class="roulette-bet" onclick="placeBet('even')">Even</div>
             </div>
             <button onclick="spinRoulette()">Spin Wheel</button>
             <p id="rouletteResult">Place your bet!</p>
@@ -126,8 +130,12 @@
         <div class="container">
             <h2>Blackjack 🃏</h2>
             <button onclick="playBlackjack()">Deal Cards</button>
-            <p id="blackjackResult">Try to hit 21!</p>
             <div class="blackjack-cards" id="blackjackCards"></div>
+            <div class="hit-stick">
+                <button onclick="hitCard()">Hit</button>
+                <button onclick="stickCard()">Stick</button>
+            </div>
+            <p id="blackjackResult">Try to hit 21!</p>
         </div>
 
         <div class="leaderboard container">
@@ -137,7 +145,7 @@
     </div>
 
     <script>
-        let solBalance = localStorage.getItem("solBalance") ? parseInt(localStorage.getItem("solBalance")) : 50;
+        let solBalance = localStorage.getItem("solBalance") ? parseInt(localStorage.getItem("solBalance")) : 100;
         let playerName = localStorage.getItem("playerName") || "";
         let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
         let rouletteBet = 0;
@@ -147,6 +155,7 @@
             playerName = document.getElementById("playerName").value.trim();
             if (playerName) {
                 localStorage.setItem("playerName", playerName);
+                localStorage.setItem("solBalance", 100); // Reset SOL to 100
                 document.getElementById("nameEntry").style.display = "none";
                 document.getElementById("casinoSection").style.display = "block";
                 updateBalance();
@@ -161,7 +170,7 @@
 
         function updateLeaderboard() {
             let list = document.getElementById("leaderboard");
-            list.innerHTML = leaderboard.map((entry, i) => `<li>${i + 1}. ${entry.name}: ${entry.score} SOL</li>`).join("");
+            list.innerHTML = leaderboard.map((entry, i) => `<li>${i + 1}. ${entry.name}: ${entry.score} SOL (${entry.score - 100 >= 0 ? '+' : ''}${entry.score - 100})</li>`).join("");
         }
 
         function placeBet(bet) {
@@ -198,6 +207,16 @@
             document.getElementById("blackjackCards").innerHTML = `Your Score: ${playerScore} | Dealer's Score: ${dealerScore}`;
             updateBalance();
             saveScore();
+        }
+
+        function hitCard() {
+            alert("You chose to hit! A new card will be dealt.");
+            // Add logic for hitting a card in Blackjack
+        }
+
+        function stickCard() {
+            alert("You chose to stick! Your cards are final.");
+            // Add logic for sticking in Blackjack
         }
 
         function saveScore() {
