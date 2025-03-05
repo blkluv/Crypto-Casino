@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crypto Casino - Meme Coin Madness</title>
   <style>
+    /* Global Styles */
     body {
       background-color: #111;
       color: #fff;
@@ -17,7 +18,7 @@
       margin: 10px;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 20px auto;
       padding: 20px;
       background: #222;
@@ -54,6 +55,7 @@
       padding: 10px;
       border-radius: 5px;
       font-size: 18px;
+      z-index: 1000;
     }
     /* About Section */
     #aboutSection {
@@ -81,11 +83,42 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+    /* Custom Roulette Wheel using conic-gradient */
+    .roulette-wheel {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      margin: 20px auto;
+      transition: transform 2s ease-out;
+      background: conic-gradient(
+        green 0deg 10deg,
+        red 10deg 30deg,
+        black 30deg 50deg,
+        red 50deg 70deg,
+        black 70deg 90deg,
+        red 90deg 110deg,
+        black 110deg 130deg,
+        red 130deg 150deg,
+        black 150deg 170deg,
+        red 170deg 190deg,
+        black 190deg 210deg,
+        red 210deg 230deg,
+        black 230deg 250deg,
+        red 250deg 270deg,
+        black 270deg 290deg,
+        red 290deg 310deg,
+        black 310deg 330deg,
+        red 330deg 350deg,
+        black 350deg 360deg
+      );
+      border: 5px solid #fff;
+      box-shadow: 0 0 20px #ff00ff;
+    }
     /* Roulette Table Styling */
     .roulette-table {
       margin: 20px auto;
       display: grid;
-      grid-template-columns: repeat(4, 60px);
+      grid-template-columns: repeat(4, 70px);
       gap: 10px;
       justify-content: center;
     }
@@ -97,23 +130,27 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       cursor: pointer;
+      font-size: 18px;
     }
     .roulette-bet:hover {
       background: #ff3388;
     }
-    .roulette-wheel {
-      width: 150px;
-      height: 150px;
-      border: 5px solid #fff;
-      border-radius: 50%;
-      margin: 20px auto;
-      transition: transform 2s ease-out;
-      background: radial-gradient(circle, red, black);
+    /* Blackjack Logo Styling */
+    .blackjack-logo {
+      background: linear-gradient(45deg, #ff0066, #ff3388);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #ff00ff;
+      display: inline-block;
     }
-    /* Blackjack Styling */
+    .blackjack-logo span {
+      font-size: 32px;
+      font-weight: bold;
+    }
+    /* Blackjack Card Styling */
     .blackjack-cards {
       font-size: 24px;
       margin-top: 10px;
@@ -142,6 +179,9 @@
 </head>
 <body>
 
+  <!-- SOL Balance Display -->
+  <div id="solBalance">SOL: 100</div>
+
   <!-- Name Entry Section -->
   <div id="nameEntry" class="container">
     <h1>Welcome to Crypto Casino 🎰</h1>
@@ -166,7 +206,6 @@
   <div id="casinoSection" style="display:none;">
     <h1>Crypto Casino 🎰</h1>
     <p><strong>Memecoin Contract Address:</strong> <span id="ca">[Insert Your CA]</span></p>
-    <div id="solBalance">SOL: 100</div>
 
     <!-- Roulette Section -->
     <div id="rouletteSection" class="container">
@@ -206,8 +245,7 @@
     <!-- Blackjack Section -->
     <div id="blackjackSection" class="container">
       <div class="game-logo" id="blackjackLogo">
-        <span class="icon">🃏</span>
-        <span class="text">Blackjack</span>
+        <div class="blackjack-logo"><span>🃏 BLACKJACK</span></div>
       </div>
       <p>Bet big, hit or stick – beat the dealer and rule the table! Enter your bet for this round:</p>
       <p>
@@ -230,7 +268,6 @@
       <h2>Leaderboard 🏆</h2>
       <p>Only real degen names allowed – track your win/loss relative to your starting 100 SOL.</p>
       <ul id="leaderboard"></ul>
-      <button onclick="resetLeaderboard()">Reset Leaderboard</button>
     </div>
   </div>
 
@@ -244,6 +281,44 @@
     let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
     // Roulette: array of bet objects { type, amount }
     let rouletteBets = [];
+    
+    // Random degen responses
+    const rouletteWinResponses = [
+      "You're on fire, you degen master!",
+      "Holy shit, you just ripped the wheel!",
+      "Damn, your luck is insane—keep that hustle!",
+      "Look at you, stacking SOL like a boss!"
+    ];
+    const rouletteLossResponses = [
+      "You lost, you pathetic degenerate!",
+      "Get rekt, you brain-dead loser!",
+      "Welp, your dumbass bet it all and lost!",
+      "Better luck next time, you sorry sack of chips!"
+    ];
+    const outOfSOLResponses = [
+      "Yo, you're broke—get more SOL, you miserable degenerate!",
+      "No SOL left, you bankrupt brain-dead loser!",
+      "You're SOL-less, you pitiful degenerate!",
+      "Empty pockets, dumbass. Time to hustle harder!"
+    ];
+    const blackjackWinResponses = [
+      "Damn, you crushed it at 21!",
+      "That's how a true degen does it—winning big!",
+      "Blackjack master! Your skills are insane!",
+      "You just owned the dealer, you absolute legend!"
+    ];
+    const blackjackLossResponses = [
+      "Bust! You lost, go cry in your beer, degenerate!",
+      "Your hand's a disaster—try not to be a total loser next time!",
+      "Dealer got you, you brain-dead sucker!",
+      "Ouch, that bust was brutal. Get reeducated, degenerate!"
+    ];
+    const blackjackPushResponses = [
+      "Push! You're lucky as hell, but not rich.",
+      "It's a tie, you degen—try for that win next time!",
+      "Stalemate, degenerate. Your fate remains undecided!",
+      "Neither here nor there, you sorry degenerate."
+    ];
     
     /**********************
      * NAME & LEADERBOARD FUNCTIONS
@@ -260,13 +335,11 @@
     }
     
     function updateBalance() {
-      // Ensure balance never goes negative
       if (solBalance < 0) solBalance = 0;
       document.getElementById("solBalance").textContent = "SOL: " + solBalance;
     }
     
     function updateLeaderboard() {
-      // Check if player already exists; if so, update, else add new record
       let existing = leaderboard.find(entry => entry.name === playerName);
       if (existing) {
         existing.score = solBalance;
@@ -274,7 +347,6 @@
         leaderboard.push({ name: playerName, score: solBalance });
       }
       localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-      // Sort and update display
       let sorted = leaderboard.sort((a, b) => b.score - a.score);
       let lbHTML = "";
       sorted.forEach((entry, i) => {
@@ -282,15 +354,6 @@
         lbHTML += `<li>${i + 1}. ${entry.name}: ${entry.score} SOL (${diff >= 0 ? "+" : ""}${diff})</li>`;
       });
       document.getElementById("leaderboard").innerHTML = lbHTML;
-    }
-    
-    function resetLeaderboard() {
-      if (confirm("Are you sure you want to wipe the leaderboard?")) {
-        leaderboard = [];
-        localStorage.removeItem("leaderboard");
-        updateLeaderboard();
-        alert("Leaderboard wiped, you sorry degenerates!");
-      }
     }
     
     /**********************
@@ -303,7 +366,7 @@
         return;
       }
       if (amount > solBalance) {
-        alert("Yo, you pathetic degenerate – you ain't got that many SOL!");
+        alert(outOfSOLResponses[Math.floor(Math.random() * outOfSOLResponses.length)]);
         return;
       }
       solBalance -= amount;
@@ -332,12 +395,11 @@
       }
       animateRoulette();
       setTimeout(() => {
-        let outcome = Math.floor(Math.random() * 37); // Outcome 0-36
+        let outcome = Math.floor(Math.random() * 37); // 0-36
         let outcomeColor = getRouletteColor(outcome);
         let totalWin = 0;
         let message = "Outcome: " + outcome + " (" + outcomeColor + "). ";
     
-        // Evaluate bets
         rouletteBets.forEach(bet => {
           let win = false;
           let payout = 0;
@@ -369,9 +431,10 @@
     
         if (totalWin > 0) {
           solBalance += totalWin;
-          message += "You win " + totalWin + " SOL!";
+          message += rouletteWinResponses[Math.floor(Math.random() * rouletteWinResponses.length)];
+          message += " You win " + totalWin + " SOL!";
         } else {
-          message += "No winning bets, sucker.";
+          message += rouletteLossResponses[Math.floor(Math.random() * rouletteLossResponses.length)];
         }
     
         document.getElementById("rouletteResult").textContent = message;
@@ -437,7 +500,7 @@
         return;
       }
       if (betAmount > solBalance) {
-        alert("Yo, you pathetic degenerate – you ain't got that many SOL!");
+        alert(outOfSOLResponses[Math.floor(Math.random() * outOfSOLResponses.length)]);
         return;
       }
       currentBJBet = betAmount;
@@ -492,7 +555,7 @@
       displayBlackjackHands(false);
       let playerTotal = calculateHand(playerHand);
       if (playerTotal > 21) {
-        endBlackjack(false, "Busted at " + playerTotal + "! You lose " + currentBJBet + " SOL, you degenerate.");
+        endBlackjack(false, blackjackLossResponses[Math.floor(Math.random() * blackjackLossResponses.length)] + " You busted at " + playerTotal + " and lost " + currentBJBet + " SOL.");
       } else {
         document.getElementById("blackjackResult").textContent = "Your total: " + playerTotal + ". Hit or Stick?";
       }
@@ -509,12 +572,12 @@
       }
       let playerTotal = calculateHand(playerHand);
       if (dealerTotal > 21 || playerTotal > dealerTotal) {
-        endBlackjack(true, "You win! Your " + playerTotal + " beats dealer's " + dealerTotal + ". You win " + currentBJBet + " SOL.");
+        endBlackjack(true, blackjackWinResponses[Math.floor(Math.random() * blackjackWinResponses.length)] + " You win! Your " + playerTotal + " beats dealer's " + dealerTotal + " and you win " + currentBJBet + " SOL.");
       } else if (playerTotal === dealerTotal) {
         solBalance += currentBJBet; // refund for push
-        endBlackjack(null, "Push! Both scored " + playerTotal + ". Bet refunded, you lucky degenerate.");
+        endBlackjack(null, blackjackPushResponses[Math.floor(Math.random() * blackjackPushResponses.length)]);
       } else {
-        endBlackjack(false, "Dealer wins with " + dealerTotal + " vs your " + playerTotal + ". You lose " + currentBJBet + " SOL.");
+        endBlackjack(false, blackjackLossResponses[Math.floor(Math.random() * blackjackLossResponses.length)] + " Dealer wins with " + dealerTotal + " vs your " + playerTotal + ". You lose " + currentBJBet + " SOL.");
       }
     }
     
@@ -531,7 +594,7 @@
       }, 3000);
     }
     
-    // Fisher-Yates shuffle
+    // Fisher-Yates Shuffle
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
