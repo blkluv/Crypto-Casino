@@ -34,34 +34,85 @@
             padding: 10px;
             border-radius: 10px;
         }
+        #solBalance {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #0f0;
+            color: #000;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .roulette-wheel {
+            width: 100px;
+            height: 100px;
+            border: 5px solid white;
+            border-radius: 50%;
+            margin: 10px auto;
+            transition: transform 2s ease-out;
+        }
+        .blackjack-cards {
+            font-size: 24px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Crypto Casino 🎰</h1>
-    <p>Bet your **fake Solana** and test your luck!</p>
-    <p><strong>Memecoin Contract Address:</strong> <span id="ca">[Insert Your CA]</span></p>
-
-    <div class="container">
-        <h2>Roulette 🎡</h2>
-        <button onclick="playRoulette()">Spin</button>
-        <p id="rouletteResult">Place your bet!</p>
+    <div id="nameEntry">
+        <h1>Welcome to Crypto Casino 🎰</h1>
+        <p>Enter your name:</p>
+        <input type="text" id="playerName" placeholder="Your Name">
+        <button onclick="saveName()">Start Playing</button>
     </div>
 
-    <div class="container">
-        <h2>Blackjack 🃏</h2>
-        <button onclick="playBlackjack()">Draw</button>
-        <p id="blackjackResult">Try to hit 21!</p>
-    </div>
+    <div id="casinoSection" style="display:none;">
+        <h1>Crypto Casino 🎰</h1>
+        <p>Bet your **fake Solana** and test your luck!</p>
+        <p><strong>Memecoin Contract Address:</strong> <span id="ca">[Insert Your CA]</span></p>
 
-    <div class="leaderboard container">
-        <h2>Leaderboard 🏆</h2>
-        <ul id="leaderboard"></ul>
+        <div id="solBalance">SOL: 50</div>
+
+        <div class="container">
+            <h2>Roulette 🎡</h2>
+            <div class="roulette-wheel" id="rouletteWheel" style="background: radial-gradient(circle, red, black);"></div>
+            <button onclick="playRoulette()">Spin</button>
+            <p id="rouletteResult">Place your bet!</p>
+        </div>
+
+        <div class="container">
+            <h2>Blackjack 🃏</h2>
+            <button onclick="playBlackjack()">Draw</button>
+            <p id="blackjackResult">Try to hit 21!</p>
+            <div class="blackjack-cards" id="blackjackCards"></div>
+        </div>
+
+        <div class="leaderboard container">
+            <h2>Leaderboard 🏆</h2>
+            <ul id="leaderboard"></ul>
+        </div>
     </div>
 
     <script>
-        let fakeSolana = 1000;
+        let solBalance = localStorage.getItem("solBalance") ? parseInt(localStorage.getItem("solBalance")) : 50;
+        let playerName = localStorage.getItem("playerName") || "";
         let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+        function saveName() {
+            playerName = document.getElementById("playerName").value.trim();
+            if (playerName) {
+                localStorage.setItem("playerName", playerName);
+                document.getElementById("nameEntry").style.display = "none";
+                document.getElementById("casinoSection").style.display = "block";
+                updateBalance();
+                updateLeaderboard();
+            }
+        }
+
+        function updateBalance() {
+            document.getElementById("solBalance").textContent = `SOL: ${solBalance}`;
+            localStorage.setItem("solBalance", solBalance);
+        }
 
         function updateLeaderboard() {
             let list = document.getElementById("leaderboard");
@@ -69,29 +120,54 @@
         }
 
         function playRoulette() {
-            let bet = Math.floor(Math.random() * 100);
+            let bet = Math.floor(Math.random() * 10);
             let win = Math.random() < 0.5;
-            fakeSolana += win ? bet : -bet;
+            solBalance += win ? bet : -bet;
             document.getElementById("rouletteResult").textContent = win ? `You won ${bet} SOL!` : `You lost ${bet} SOL!`;
+            updateBalance();
+
+            // Animate Roulette
+            let wheel = document.getElementById("rouletteWheel");
+            let rotation = Math.floor(Math.random() * 360) + 720; // Spin at least 2 full rotations
+            wheel.style.transform = `rotate(${rotation}deg)`;
+
             saveScore();
         }
 
         function playBlackjack() {
-            let score = Math.floor(Math.random() * 21) + 1;
+            let score = Math.floor(Math.random() * 11) + 10;
             let win = score === 21;
-            fakeSolana += win ? 200 : -50;
-            document.getElementById("blackjackResult").textContent = win ? "BLACKJACK! +200 SOL" : `You got ${score}. -50 SOL`;
+            solBalance += win ? 20 : -5;
+            document.getElementById("blackjackResult").textContent = win ? "BLACKJACK! +20 SOL" : `You got ${score}. -5 SOL`;
+            updateBalance();
+
+            // Animate Card Draw
+            let cardSymbols = ["♠️", "♥️", "♦️", "♣️"];
+            let card1 = cardSymbols[Math.floor(Math.random() * 4)];
+            let card2 = cardSymbols[Math.floor(Math.random() * 4)];
+            document.getElementById("blackjackCards").innerHTML = `Cards: ${card1} ${card2}`;
+
             saveScore();
         }
 
         function saveScore() {
-            leaderboard.push({ name: "Player", score: fakeSolana });
+            let existingPlayer = leaderboard.find(entry => entry.name === playerName);
+            if (existingPlayer) {
+                existingPlayer.score = solBalance;
+            } else {
+                leaderboard.push({ name: playerName, score: solBalance });
+            }
             leaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 5);
             localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
             updateLeaderboard();
         }
 
-        updateLeaderboard();
+        if (playerName) {
+            document.getElementById("nameEntry").style.display = "none";
+            document.getElementById("casinoSection").style.display = "block";
+            updateBalance();
+            updateLeaderboard();
+        }
     </script>
 
 </body>
