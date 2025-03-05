@@ -9,9 +9,9 @@
       background-color: #111;
       color: #fff;
       font-family: 'Arial', sans-serif;
-      text-align: center;
       margin: 0;
       padding: 0;
+      text-align: center;
     }
     h1, h2, p {
       margin: 10px;
@@ -54,6 +54,32 @@
       padding: 10px;
       border-radius: 5px;
       font-size: 18px;
+    }
+    /* About Section */
+    #aboutSection {
+      background: #1a1a1a;
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #ff00ff;
+    }
+    /* Game Logo Styling */
+    .game-logo {
+      margin: 10px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .game-logo span.icon {
+      font-size: 48px;
+      display: inline-block;
+    }
+    .game-logo span.text {
+      font-size: 28px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     /* Roulette Table Styling */
     .roulette-table {
@@ -125,6 +151,17 @@
     <button onclick="saveName()">Start Playing</button>
   </div>
 
+  <!-- About Section -->
+  <div id="aboutSection" class="container">
+    <h2>About Crypto Casino ($CC)</h2>
+    <p>
+      Crypto Casino ($CC) isn’t just another meme coin—it’s a revolution in the world of degen gaming! Combining the thrill of casino classics like Roulette and Blackjack with blockchain power, $CC brings a community-driven, high-stakes experience where every spin and every card can turn you into a legend.
+    </p>
+    <p>
+      Buy $CC and join the ranks of those who dare to bet big, laugh hard, and ride the crypto wave. This is where memes meet money, and every degenerate has a shot at glory!
+    </p>
+  </div>
+
   <!-- Main Casino Section -->
   <div id="casinoSection" style="display:none;">
     <h1>Crypto Casino 🎰</h1>
@@ -133,7 +170,10 @@
 
     <!-- Roulette Section -->
     <div id="rouletteSection" class="container">
-      <h2>Roulette 🎡</h2>
+      <div class="game-logo" id="rouletteLogo">
+        <span class="icon">🎡</span>
+        <span class="text">Roulette</span>
+      </div>
       <p>Place your bets on numbers, colors, odd or even – stack ‘em up degen style! You can bet on multiple outcomes before the spin.</p>
       <div class="roulette-wheel" id="rouletteWheel"></div>
       <div class="roulette-table" id="rouletteTable">
@@ -165,7 +205,10 @@
 
     <!-- Blackjack Section -->
     <div id="blackjackSection" class="container">
-      <h2>Blackjack 🃏</h2>
+      <div class="game-logo" id="blackjackLogo">
+        <span class="icon">🃏</span>
+        <span class="text">Blackjack</span>
+      </div>
       <p>Bet big, hit or stick – beat the dealer and rule the table! Enter your bet for this round:</p>
       <p>
         Bet Amount (SOL): <input type="number" id="bjBet" min="1" placeholder="Bet Amount" />
@@ -187,6 +230,7 @@
       <h2>Leaderboard 🏆</h2>
       <p>Only real degen names allowed – track your win/loss relative to your starting 100 SOL.</p>
       <ul id="leaderboard"></ul>
+      <button onclick="resetLeaderboard()">Reset Leaderboard</button>
     </div>
   </div>
 
@@ -196,7 +240,7 @@
      **********************/
     let solBalance = 100;
     let playerName = "";
-    // Load persistent leaderboard from localStorage (or use empty array if not found)
+    // Load persistent leaderboard from localStorage or use an empty array
     let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
     // Roulette: array of bet objects { type, amount }
     let rouletteBets = [];
@@ -207,7 +251,6 @@
     function saveName() {
       playerName = document.getElementById("playerName").value.trim();
       if (playerName) {
-        // Do not clear leaderboard—load it from localStorage already done.
         solBalance = 100;
         updateBalance();
         updateLeaderboard();
@@ -217,20 +260,21 @@
     }
     
     function updateBalance() {
+      // Ensure balance never goes negative
+      if (solBalance < 0) solBalance = 0;
       document.getElementById("solBalance").textContent = "SOL: " + solBalance;
     }
     
     function updateLeaderboard() {
-      // Check if player already exists in leaderboard
+      // Check if player already exists; if so, update, else add new record
       let existing = leaderboard.find(entry => entry.name === playerName);
       if (existing) {
         existing.score = solBalance;
       } else {
         leaderboard.push({ name: playerName, score: solBalance });
       }
-      // Save leaderboard persistently
       localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-      // Update leaderboard display (sorted by score descending)
+      // Sort and update display
       let sorted = leaderboard.sort((a, b) => b.score - a.score);
       let lbHTML = "";
       sorted.forEach((entry, i) => {
@@ -240,17 +284,26 @@
       document.getElementById("leaderboard").innerHTML = lbHTML;
     }
     
+    function resetLeaderboard() {
+      if (confirm("Are you sure you want to wipe the leaderboard?")) {
+        leaderboard = [];
+        localStorage.removeItem("leaderboard");
+        updateLeaderboard();
+        alert("Leaderboard wiped, you sorry degenerates!");
+      }
+    }
+    
     /**********************
      * ROULETTE FUNCTIONS
      **********************/
     function placeRouletteBet(betType) {
       let amount = parseFloat(prompt("Enter SOL amount to bet on " + betType + ":"));
       if (isNaN(amount) || amount <= 0) {
-        alert("Invalid bet amount.");
+        alert("Invalid bet amount, you brain-dead degenerate!");
         return;
       }
       if (amount > solBalance) {
-        alert("Not enough SOL for that bet.");
+        alert("Yo, you pathetic degenerate – you ain't got that many SOL!");
         return;
       }
       solBalance -= amount;
@@ -274,7 +327,7 @@
     
     function spinRoulette() {
       if (rouletteBets.length === 0) {
-        alert("Place at least one bet first!");
+        alert("Place at least one bet first, you degenerate!");
         return;
       }
       animateRoulette();
@@ -284,12 +337,11 @@
         let totalWin = 0;
         let message = "Outcome: " + outcome + " (" + outcomeColor + "). ";
     
-        // Evaluate each bet
+        // Evaluate bets
         rouletteBets.forEach(bet => {
           let win = false;
           let payout = 0;
           if (!isNaN(bet.type)) {
-            // Bet on a specific number
             if (parseInt(bet.type) === outcome) {
               win = true;
               payout = bet.amount * 35;
@@ -311,7 +363,7 @@
             }
           }
           if (win) {
-            totalWin += payout + bet.amount; // return stake plus winnings
+            totalWin += payout + bet.amount;
           }
         });
     
@@ -319,7 +371,7 @@
           solBalance += totalWin;
           message += "You win " + totalWin + " SOL!";
         } else {
-          message += "No winning bets.";
+          message += "No winning bets, sucker.";
         }
     
         document.getElementById("rouletteResult").textContent = message;
@@ -349,7 +401,7 @@
       rouletteBets = [];
       displayCurrentBets();
       updateBalance();
-      alert("All roulette bets cleared.");
+      alert("All roulette bets cleared, you filthy degenerate.");
     }
     
     /**********************
@@ -376,16 +428,16 @@
     
     function startBlackjack() {
       if (inBlackjackGame) {
-        alert("Finish the current game first!");
+        alert("Finish your current game, degenerate!");
         return;
       }
       let betAmount = parseFloat(document.getElementById("bjBet").value);
       if (isNaN(betAmount) || betAmount <= 0) {
-        alert("Enter a valid bet amount.");
+        alert("Enter a valid bet amount, you brain-dead loser!");
         return;
       }
       if (betAmount > solBalance) {
-        alert("Not enough SOL for that bet.");
+        alert("Yo, you pathetic degenerate – you ain't got that many SOL!");
         return;
       }
       currentBJBet = betAmount;
@@ -440,7 +492,7 @@
       displayBlackjackHands(false);
       let playerTotal = calculateHand(playerHand);
       if (playerTotal > 21) {
-        endBlackjack(false, "Busted at " + playerTotal + "! You lose " + currentBJBet + " SOL.");
+        endBlackjack(false, "Busted at " + playerTotal + "! You lose " + currentBJBet + " SOL, you degenerate.");
       } else {
         document.getElementById("blackjackResult").textContent = "Your total: " + playerTotal + ". Hit or Stick?";
       }
@@ -460,7 +512,7 @@
         endBlackjack(true, "You win! Your " + playerTotal + " beats dealer's " + dealerTotal + ". You win " + currentBJBet + " SOL.");
       } else if (playerTotal === dealerTotal) {
         solBalance += currentBJBet; // refund for push
-        endBlackjack(null, "Push! Both scored " + playerTotal + ". Bet refunded.");
+        endBlackjack(null, "Push! Both scored " + playerTotal + ". Bet refunded, you lucky degenerate.");
       } else {
         endBlackjack(false, "Dealer wins with " + dealerTotal + " vs your " + playerTotal + ". You lose " + currentBJBet + " SOL.");
       }
@@ -487,7 +539,6 @@
       }
       return array;
     }
-    
   </script>
 </body>
 </html>
