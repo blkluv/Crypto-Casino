@@ -123,12 +123,9 @@
       height: 50px;
       background-color: rgba(255,0,0,0.8);
       color: #fff;
-      text-align: center;
-      line-height: 50px;
       border-radius: 50%;
       font-weight: bold;
     }
-    /* Ensure numbers are centered */
     .roulette-wheel .roulette-number span {
       position: absolute;
       top: 50%;
@@ -138,9 +135,9 @@
     /* Roulette Pointer */
     .roulette-pointer {
       position: absolute;
-      top: 50%;
+      top: -20px;
       left: 50%;
-      transform: translate(-50%, -110%);
+      transform: translateX(-50%);
       width: 0;
       height: 0;
       border-left: 15px solid transparent;
@@ -283,7 +280,9 @@
         <span class="text">Roulette</span>
       </div>
       <p>Place your bets on numbers, colors, odd or even – stack ‘em up degen style! You can bet on multiple outcomes before the spin.</p>
-      <div class="roulette-wheel" id="rouletteWheel"></div>
+      <div class="roulette-wheel" id="rouletteWheel">
+        <!-- Roulette numbers will be generated dynamically -->
+      </div>
       <div class="roulette-pointer"></div>
       <div class="roulette-table" id="rouletteTable">
         <!-- For demo, numbers 0-12 -->
@@ -362,7 +361,9 @@
     let inBlackjackGame = false;
     let currentBJBet = 0;
     
-    // Random degen responses
+    /**********************
+     * RANDOM RESPONSES
+     **********************/
     const rouletteWinResponses = [
       "You're on fire, you degen master!",
       "Holy shit, you just ripped the wheel!",
@@ -411,6 +412,8 @@
         updateLeaderboard();
         document.getElementById("nameEntry").style.display = "none";
         document.getElementById("casinoSection").style.display = "block";
+      } else {
+        alert("Enter your fucking name, you twat!");
       }
     }
     
@@ -439,6 +442,28 @@
     /**********************
      * ROULETTE FUNCTIONS
      **********************/
+    // Generate roulette numbers on the wheel
+    function generateRouletteNumbers() {
+      const wheel = document.getElementById("rouletteWheel");
+      const totalNumbers = 37; // 0 to 36
+      const angleStep = 360 / totalNumbers;
+      for (let i = 0; i < totalNumbers; i++) {
+        let numberEl = document.createElement("div");
+        numberEl.classList.add("roulette-number");
+        numberEl.innerHTML = `<span>${i}</span>`;
+        let angle = i * angleStep;
+        // Place the number at a set radius from the center
+        let radius = 80;
+        let x = radius * Math.cos(angle * Math.PI / 180) + (200/2) - 25; // 25 = half of number element width
+        let y = radius * Math.sin(angle * Math.PI / 180) + (200/2) - 25;
+        numberEl.style.left = x + "px";
+        numberEl.style.top = y + "px";
+        wheel.appendChild(numberEl);
+      }
+    }
+    
+    generateRouletteNumbers();
+    
     function placeRouletteBet(betType) {
       let amount = parseFloat(prompt("Enter SOL amount to bet on " + betType + ":"));
       if (isNaN(amount) || amount <= 0) {
@@ -513,10 +538,10 @@
           solBalance += totalWin;
           message += rouletteWinResponses[Math.floor(Math.random() * rouletteWinResponses.length)];
           message += " You win " + totalWin + " SOL!";
-          showCandle("green");
+          showCandle("green", totalWin);
         } else {
           message += rouletteLossResponses[Math.floor(Math.random() * rouletteLossResponses.length)];
-          showCandle("red");
+          showCandle("red", 0);
         }
     
         document.getElementById("rouletteResult").textContent = message;
