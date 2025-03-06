@@ -45,6 +45,7 @@
       border: none;
       margin: 5px;
       font-size: 16px;
+      text-align: center;
     }
     #solBalance {
       position: fixed;
@@ -113,6 +114,39 @@
       );
       border: 5px solid #fff;
       box-shadow: 0 0 20px #ff00ff;
+      position: relative;
+    }
+    /* Roulette Numbers */
+    .roulette-wheel .roulette-number {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: rgba(255,0,0,0.8);
+      color: #fff;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 50%;
+      font-weight: bold;
+    }
+    /* Ensure numbers are centered */
+    .roulette-wheel .roulette-number span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    /* Roulette Pointer */
+    .roulette-pointer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -110%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 25px solid yellow;
+      z-index: 2;
     }
     /* Roulette Table Styling */
     .roulette-table {
@@ -164,6 +198,10 @@
       border: 2px solid #ff0066;
       border-radius: 5px;
       background: #333;
+      transition: transform 0.5s;
+    }
+    .card.flip {
+      transform: rotateY(180deg);
     }
     .hit-stick {
       margin-top: 20px;
@@ -174,6 +212,37 @@
       background: #333;
       padding: 10px;
       border-radius: 10px;
+    }
+    /* Crypto Candle Animations */
+    .candle {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      display: none;
+      z-index: 999;
+    }
+    .green-candle {
+      background-image: url('https://www.pngkey.com/png/full/14-148974_green-candle-png.png');
+      animation: pump 1s ease-in-out;
+    }
+    .red-candle {
+      background-image: url('https://www.pngkey.com/png/full/14-148975_red-candle-png.png');
+      animation: dump 1s ease-in-out;
+    }
+    @keyframes pump {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    @keyframes dump {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.8); }
+      100% { transform: scale(1); }
     }
   </style>
 </head>
@@ -215,6 +284,7 @@
       </div>
       <p>Place your bets on numbers, colors, odd or even – stack ‘em up degen style! You can bet on multiple outcomes before the spin.</p>
       <div class="roulette-wheel" id="rouletteWheel"></div>
+      <div class="roulette-pointer"></div>
       <div class="roulette-table" id="rouletteTable">
         <!-- For demo, numbers 0-12 -->
         <div class="roulette-bet" onclick="placeRouletteBet('0')">0</div>
@@ -237,8 +307,8 @@
         <div class="roulette-bet" onclick="placeRouletteBet('even')">Even</div>
       </div>
       <div id="currentBets" style="margin:10px; font-weight:bold;">Current Bets: None</div>
-      <button onclick="spinRoulette()">Spin the Wheel</button>
-      <p id="rouletteResult">Place your bets!</p>
+      <button onclick="spinRoulette()">Spin the Fucking Wheel</button>
+      <p id="rouletteResult">Place your bets, asshole!</p>
       <button onclick="clearRouletteBets()">Clear Bets</button>
     </div>
 
@@ -271,6 +341,10 @@
     </div>
   </div>
 
+  <!-- Crypto Candles for Win/Loss Animations -->
+  <div id="greenCandle" class="candle green-candle"></div>
+  <div id="redCandle" class="candle red-candle"></div>
+
   <script>
     /**********************
      * GLOBAL VARIABLES
@@ -281,6 +355,12 @@
     let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
     // Roulette: array of bet objects { type, amount }
     let rouletteBets = [];
+    // Blackjack variables
+    let bjDeck = [];
+    let playerHand = [];
+    let dealerHand = [];
+    let inBlackjackGame = false;
+    let currentBJBet = 0;
     
     // Random degen responses
     const rouletteWinResponses = [
@@ -433,8 +513,10 @@
           solBalance += totalWin;
           message += rouletteWinResponses[Math.floor(Math.random() * rouletteWinResponses.length)];
           message += " You win " + totalWin + " SOL!";
+          showCandle("green");
         } else {
           message += rouletteLossResponses[Math.floor(Math.random() * rouletteLossResponses.length)];
+          showCandle("red");
         }
     
         document.getElementById("rouletteResult").textContent = message;
@@ -589,6 +671,11 @@
       updateBalance();
       document.getElementById("blackjackResult").textContent = message;
       updateLeaderboard();
+      if (win === true) {
+        showCandle("green");
+      } else if (win === false) {
+        showCandle("red");
+      }
       setTimeout(() => {
         document.getElementById("blackjackGame").style.display = "none";
       }, 3000);
@@ -601,6 +688,13 @@
         [array[i], array[j]] = [array[j], array[i]];
       }
       return array;
+    }
+    
+    // Show candle animation for win/loss
+    function showCandle(color) {
+      let candle = document.getElementById(color + "Candle");
+      candle.style.display = "block";
+      setTimeout(() => { candle.style.display = "none"; }, 3000);
     }
   </script>
 </body>
